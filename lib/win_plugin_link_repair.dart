@@ -3,6 +3,11 @@ import 'dart:io';
 
 const String _platform = 'windows';
 
+/// Runs the `win_plugin_link_repair` command.
+///
+/// The command must be launched from a Flutter project root. It reads
+/// `.flutter-plugins-dependencies`, finds Windows plugins, and rebuilds their
+/// entries under `windows/flutter/ephemeral/.plugin_symlinks` as junctions.
 Future<int> run(List<String> args) async {
   final _Options options = _Options.parse(args);
   if (options.help) {
@@ -133,6 +138,10 @@ Future<int> run(List<String> args) async {
   return failed > 0 ? 1 : 0;
 }
 
+/// Reads Windows plugin dependencies from `.flutter-plugins-dependencies`.
+///
+/// Invalid plugin entries are ignored, matching Flutter's generated metadata
+/// tolerance. Malformed metadata throws a [FormatException].
 List<PluginDependency> readPluginsFromDependencyContent(String content) {
   final Object? decoded = jsonDecode(content);
   if (decoded is! Map<String, Object?>) {
@@ -173,6 +182,11 @@ List<PluginDependency> readPluginsFromDependencyContent(String content) {
   return result;
 }
 
+/// Normalizes a Windows path from Flutter plugin metadata.
+///
+/// Flutter metadata can contain forward slashes even on Windows. This keeps UNC
+/// prefixes intact, collapses repeated separators, and removes trailing
+/// separators.
 String normalizeWindowsPath(String path) {
   String value = path.trim().replaceAll('/', r'\');
   final String uncPrefix = value.startsWith(r'\\') ? r'\\' : '';
@@ -289,15 +303,22 @@ Notes:
 ''');
 }
 
+/// A Windows plugin entry from Flutter's dependency metadata.
 final class PluginDependency {
+  /// Creates a plugin dependency entry.
   const PluginDependency({
     required this.name,
     required this.path,
     required this.nativeBuild,
   });
 
+  /// The plugin package name.
   final String name;
+
+  /// The absolute package path from `.flutter-plugins-dependencies`.
   final String path;
+
+  /// Whether Flutter marked the plugin as requiring a native build.
   final bool nativeBuild;
 }
 

@@ -1,6 +1,6 @@
 name: win_plugin_link_repair
 description: Repair Flutter Windows plugin links by rebuilding .plugin_symlinks as junctions.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/super-lz/win_plugin_link_repair
 
 environment:
